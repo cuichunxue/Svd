@@ -115,15 +115,15 @@ class SVDAnomalyDetector:
         """
         trajectory_matrix = self._create_trajectory_matrix(time_series)
 
-        # Reconstruct using top-k singular values
+        # Use the principal components from training data
         U_k = self.U[:, :self.rank]
-        s_k = self.s[:self.rank]
-        Vt_k = self.Vt[:self.rank, :]
 
-        reconstructed = U_k @ np.diag(s_k) @ Vt_k
+        # Project the trajectory matrix onto the principal subspace
+        # and then reconstruct it
+        projected = U_k @ U_k.T @ trajectory_matrix
 
-        # Calculate reconstruction error for each window
-        errors = np.linalg.norm(trajectory_matrix - reconstructed, axis=0)
+        # Calculate reconstruction error for each window (column)
+        errors = np.linalg.norm(trajectory_matrix - projected, axis=0)
 
         return errors
 
